@@ -7,6 +7,8 @@
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@nomicfoundation/hardhat-verify": "^2.0.13",
+    "@nomicfoundation/solidity-analyzer-darwin-x64": "^0.1.2",
     "@openzeppelin/hardhat-upgrades": "^3.7.0",
     "chai": "^4.2.0",
     "eslint": "^9.16.0",
@@ -24,6 +26,7 @@
     "@openzeppelin/contracts-upgradeable": "^5.1.0",
     "@uniswap/v3-periphery": "^1.4.4",
     "hardhat-dependency-compiler": "^1.2.1",
-    "solidity-bytes-utils": "^0.8.2"
+    "solidity-bytes-utils": "^0.8.2",
+    "dotenv": "^16.4.7"
   }
 }
