@@ -25,14 +25,20 @@ module.exports = {
     hardhat: {
       initialBaseFeePerGas: 0,
     },
+    base: {
+      url: "https://base-mainnet.g.alchemy.com/v2/bqyyjg0O_PTODCAzky3s9a68zwTnn7x3",
+      accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+      gasPrice: 'auto',
+    },
     baseSepolia: {
-      url: "https://sepolia.base.org",
+      url: "https://base-sepolia.g.alchemy.com/v2/bqyyjg0O_PTODCAzky3s9a68zwTnn7x3",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
       gasPrice: 'auto',
     },
     scrollSepolia: {
       url: "https://sepolia-rpc.scroll.io",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
+      gasPrice: 'auto',
       // gasPrice: 'auto',
       // chainId: 534351,
     },
@@ -41,10 +47,18 @@ module.exports = {
     apiKey: process.env.ETHERSCAN_API_KEY || "",
     customChains: [
       {
+        network: "base",
+        chainId: 8453,
+        urls: {
+          apiURL: "https://api.etherscan.io/v2/api",
+          browserURL: "https://basescan.org"
+        }
+      },
+      {
         network: "baseSepolia",
         chainId: 84532,
         urls: {
-          apiURL: "https://api-sepolia.basescan.org/api",
+          apiURL: "https://api.etherscan.io/v2/api",
           browserURL: "https://sepolia.basescan.org"
         }
       },
@@ -52,7 +66,7 @@ module.exports = {
         network: "scrollSepolia",
         chainId: 534351,
         urls: {
-          apiURL: "https://api-sepolia.scrollscan.com/api",
+          apiURL: "https://api.etherscan.io/v2/api",
           browserURL: "https://sepolia.scrollscan.com"
         }
       }
