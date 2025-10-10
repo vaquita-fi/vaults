@@ -1,14 +1,6 @@
 name: Deploy Vaults to Base Networks
 
 on:
-  push:
-    branches: [ main, deploy ]
-    paths:
-      - 'contracts/**'
-      - 'scripts/**'
-      - 'hardhat.config.js'
-      - 'package.json'
-      - '.github/workflows/deploy.yaml'
   workflow_dispatch:
     inputs:
       network:
@@ -35,9 +27,9 @@ on:
         default: true
         type: boolean
       skip_tests:
-        description: 'Skip running tests before deployment'
+        description: 'Skip running tests before deployment (default: true)'
         required: false
-        default: false
+        default: true
         type: boolean
 
 env:
@@ -47,7 +39,7 @@ env:
 jobs:
   # Test job
   test:
-    if: ${{ !inputs.skip_tests || github.event_name == 'push' }}
+    if: ${{ !inputs.skip_tests }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -73,9 +65,7 @@ jobs:
 
   # Deploy to Base Sepolia (testnet)
   deploy-base-sepolia:
-    if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/deploy') ||
-      (github.event_name == 'workflow_dispatch' && inputs.network == 'baseSepolia')
+    if: ${{ inputs.network == 'baseSepolia' }}
     needs: test
     runs-on: ubuntu-latest
     environment: base-sepolia
@@ -105,7 +95,7 @@ jobs:
 
       - name: Deploy vault to Base Sepolia
         run: |
-          ./scripts/deploy-to-base-sepolia.sh --token ${{ inputs.token || 'USDC' }} ${{ (inputs.verify == false || github.event_name == 'push') && '--no-verify' || '' }}
+          ./scripts/deploy-to-base-sepolia.sh --token ${{ inputs.token }} ${{ inputs.verify == false && '--no-verify' || '' }}
 
       - name: Upload deployment artifacts
         uses: actions/upload-artifact@v4
@@ -119,9 +109,7 @@ jobs:
 
   # Deploy to Base Mainnet
   deploy-base-mainnet:
-    if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-      (github.event_name == 'workflow_dispatch' && inputs.network == 'base')
+    if: ${{ inputs.network == 'base' }}
     needs: test
     runs-on: ubuntu-latest
     environment: base-mainnet
@@ -151,7 +139,7 @@ jobs:
 
       - name: Deploy vault to Base Mainnet
         run: |
-          ./scripts/deploy-to-base.sh --token ${{ inputs.token || 'USDC' }} ${{ (inputs.verify == false || github.event_name == 'push') && '--no-verify' || '' }}
+          ./scripts/deploy-to-base.sh --token ${{ inputs.token }} ${{ inputs.verify == false && '--no-verify' || '' }}
 
       - name: Upload deployment artifacts
         uses: actions/upload-artifact@v4

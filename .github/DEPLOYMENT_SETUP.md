@@ -55,18 +55,7 @@ For the `base-mainnet` environment, consider adding:
 
 ## 🚀 Workflow Triggers
 
-### Automatic Triggers
-
-1. **Push to `deploy` branch**: Deploys to Base Sepolia (testnet)
-2. **Push to `main` branch**: Deploys to Base Mainnet
-3. **Path-based**: Only triggers on changes to contracts, scripts, or config files
-
-**Note**: Automatic deployments use default values:
-- Token: USDC
-- Verification: Disabled (for faster deployments)
-- Tests: Enabled
-
-### Manual Triggers
+### Manual Triggers Only
 
 Use the "Actions" tab → "Deploy Vaults to Base Networks" → "Run workflow" with options:
 
