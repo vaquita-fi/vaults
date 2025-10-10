@@ -14,6 +14,12 @@ const TOKEN_CONFIGS = {
       symbol: "USDC",
       name: "USD Coin"
     },
+    WETH: {
+      address: "0x4200000000000000000000000000000000000006", // Native WETH on Base Sepolia
+      aavePool: "0x07eA79F68B2B3df564D0A34F8e19D9B1e339814b",
+      symbol: "WETH",
+      name: "Wrapped Ether"
+    },
     USDT: {
       address: "0x0a215D8ba66387DCA84B284D18c3B4ec3de6E54a",
       aavePool: "0x8bAB6d1b75f19e9eD9fCe8b9BD338844fF79aE27",
