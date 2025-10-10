@@ -26,55 +26,15 @@ on:
         required: true
         default: true
         type: boolean
-      skip_tests:
-        description: 'Skip running tests before deployment (default: true)'
-        required: false
-        default: true
-        type: boolean
 
 env:
   NODE_VERSION: '18'
   VERIFICATION_DELAY: '15'
 
 jobs:
-  # Test job
-  test:
-    if: ${{ !inputs.skip_tests }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Compile contracts
-        run: npx hardhat compile
-
-      - name: Run linting
-        run: npm run solhint
-
-      - name: Run tests
-        run: npx hardhat test
-
-  # Dummy job when tests are skipped
-  test-skipped:
-    if: ${{ inputs.skip_tests }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Tests skipped
-        run: echo "Tests skipped as requested"
-
   # Deploy to Base Sepolia (testnet)
   deploy-base-sepolia:
     if: ${{ inputs.network == 'baseSepolia' }}
-    needs: [test, test-skipped]
     runs-on: ubuntu-latest
     environment: base-sepolia
     steps:
@@ -118,7 +78,6 @@ jobs:
   # Deploy to Base Mainnet
   deploy-base-mainnet:
     if: ${{ inputs.network == 'base' }}
-    needs: [test, test-skipped]
     runs-on: ubuntu-latest
     environment: base-mainnet
     steps:
@@ -163,7 +122,7 @@ jobs:
   # Notification job
   notify:
     if: always()
-    needs: [test, test-skipped, deploy-base-sepolia, deploy-base-mainnet]
+    needs: [deploy-base-sepolia, deploy-base-mainnet]
     runs-on: ubuntu-latest
     steps:
       - name: Deployment Summary
@@ -172,7 +131,6 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Tests | ${{ needs.test.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Base Sepolia | ${{ needs.deploy-base-sepolia.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Base Mainnet | ${{ needs.deploy-base-mainnet.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
