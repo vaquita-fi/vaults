@@ -88,7 +88,7 @@ jobs:
       - name: Create environment file
         run: |
           cat > .env << EOF
-          PRIVATE_KEY=${{ secrets.PRIVATE_KEY }}
+          PRIVATE_KEY=${{ secrets.TESTNET_PRIVATE_KEY }}
           ETHERSCAN_API_KEY=${{ secrets.ETHERSCAN_API_KEY }}
           VERIFICATION_DELAY=${{ env.VERIFICATION_DELAY }}
           EOF
@@ -132,7 +132,7 @@ jobs:
       - name: Create environment file
         run: |
           cat > .env << EOF
-          PRIVATE_KEY=${{ secrets.PRIVATE_KEY }}
+          PRIVATE_KEY=${{ secrets.PRODUCTION_PRIVATE_KEY }}
           ETHERSCAN_API_KEY=${{ secrets.ETHERSCAN_API_KEY }}
           VERIFICATION_DELAY=${{ env.VERIFICATION_DELAY }}
           EOF
