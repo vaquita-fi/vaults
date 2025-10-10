@@ -11,9 +11,9 @@ while [[ "$#" -gt 0 ]]; do
     --no-verify) VERIFY="false"; shift ;;
     --token) TOKEN_TYPE="$2"; shift 2 ;;
     --help) 
-      echo "Usage: $0 [--no-verify] [--token USDC|USDT]"
+      echo "Usage: $0 [--no-verify] [--token USDC|USDT|WETH]"
       echo "  --no-verify: Skip contract verification"
-      echo "  --token: Token type to deploy (USDC, USDT)"
+      echo "  --token: Token type to deploy (USDC, USDT, WETH)"
       exit 0 ;;
     *) echo "Unknown parameter: $1. Use --help for usage information."; exit 1 ;;
   esac
@@ -60,8 +60,8 @@ if [ "$VERIFY" == "true" ] && (! grep -q "ETHERSCAN_API_KEY=" .env || grep -q "E
 fi
 
 # Validate token type
-if [[ "$TOKEN_TYPE" != "USDC" && "$TOKEN_TYPE" != "USDT" ]]; then
-  echo "❌ Invalid token type: $TOKEN_TYPE. Must be USDC or USDT."
+if [[ "$TOKEN_TYPE" != "USDC" && "$TOKEN_TYPE" != "USDT" && "$TOKEN_TYPE" != "WETH" ]]; then
+  echo "❌ Invalid token type: $TOKEN_TYPE. Must be USDC, USDT, or WETH."
   exit 1
 fi
 
@@ -91,6 +91,7 @@ echo "2. Run the following command:"
 echo "   npx hardhat run scripts/interact-with-vault.js --network baseSepolia"
 echo ""
 echo "📊 To deploy other tokens:"
-echo "   ./scripts/deploy-to-base-sepolia.sh --token USDT"
 echo "   ./scripts/deploy-to-base-sepolia.sh --token USDC"
+echo "   ./scripts/deploy-to-base-sepolia.sh --token USDT"
+echo "   ./scripts/deploy-to-base-sepolia.sh --token WETH"
 echo "===========================================================" 

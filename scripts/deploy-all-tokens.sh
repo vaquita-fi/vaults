@@ -7,20 +7,20 @@ echo "=================================================="
 # Parse command line arguments
 NETWORK=""
 VERIFY="true"
-TOKENS="USDC,USDT"
+TOKENS="USDC,USDT,WETH"
 while [[ "$#" -gt 0 ]]; do
   case $1 in
     --network) NETWORK="$2"; shift 2 ;;
     --no-verify) VERIFY="false"; shift ;;
     --tokens) TOKENS="$2"; shift 2 ;;
     --help) 
-      echo "Usage: $0 --network <base|baseSepolia> [--no-verify] [--tokens USDC,USDT]"
+      echo "Usage: $0 --network <base|baseSepolia> [--no-verify] [--tokens USDC,USDT,WETH]"
       echo "  --network: Target network (base or baseSepolia)"
       echo "  --no-verify: Skip contract verification"
       echo "  --tokens: Comma-separated list of tokens to deploy"
       echo ""
       echo "Examples:"
-      echo "  $0 --network baseSepolia --tokens USDC,USDT"
+      echo "  $0 --network baseSepolia --tokens USDC,USDT,WETH"
       echo "  $0 --network base --tokens USDC,WETH,cbBTC"
       exit 0 ;;
     *) echo "Unknown parameter: $1. Use --help for usage information."; exit 1 ;;
@@ -93,8 +93,8 @@ for TOKEN in "${TOKEN_ARRAY[@]}"; do
   echo "================================================"
   
   # Check if token is supported on the network
-  if [ "$NETWORK" == "baseSepolia" ] && [[ "$TOKEN" == "WETH" || "$TOKEN" == "cbBTC" ]]; then
-    echo "⚠️ $TOKEN is not available on Base Sepolia testnet. Only USDC and USDT are supported. Skipping..."
+  if [ "$NETWORK" == "baseSepolia" ] && [[ "$TOKEN" == "cbBTC" ]]; then
+    echo "⚠️ $TOKEN is not available on Base Sepolia testnet. Only USDC, USDT, and WETH are supported. Skipping..."
     DEPLOYMENT_RESULTS[$TOKEN]="SKIPPED"
     continue
   fi
@@ -158,6 +158,7 @@ echo "📊 To deploy individual tokens:"
 if [ "$NETWORK" == "baseSepolia" ]; then
   echo "   ./scripts/deploy-to-base-sepolia.sh --token USDC"
   echo "   ./scripts/deploy-to-base-sepolia.sh --token USDT"
+  echo "   ./scripts/deploy-to-base-sepolia.sh --token WETH"
 else
   echo "   ./scripts/deploy-to-base.sh --token USDC"
   echo "   ./scripts/deploy-to-base.sh --token WETH"
