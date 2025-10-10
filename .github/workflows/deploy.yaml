@@ -63,10 +63,18 @@ jobs:
       - name: Run tests
         run: npx hardhat test
 
+  # Dummy job when tests are skipped
+  test-skipped:
+    if: ${{ inputs.skip_tests }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Tests skipped
+        run: echo "Tests skipped as requested"
+
   # Deploy to Base Sepolia (testnet)
   deploy-base-sepolia:
     if: ${{ inputs.network == 'baseSepolia' }}
-    needs: test
+    needs: [test, test-skipped]
     runs-on: ubuntu-latest
     environment: base-sepolia
     steps:
@@ -110,7 +118,7 @@ jobs:
   # Deploy to Base Mainnet
   deploy-base-mainnet:
     if: ${{ inputs.network == 'base' }}
-    needs: test
+    needs: [test, test-skipped]
     runs-on: ubuntu-latest
     environment: base-mainnet
     steps:
@@ -155,7 +163,7 @@ jobs:
   # Notification job
   notify:
     if: always()
-    needs: [test, deploy-base-sepolia, deploy-base-mainnet]
+    needs: [test, test-skipped, deploy-base-sepolia, deploy-base-mainnet]
     runs-on: ubuntu-latest
     steps:
       - name: Deployment Summary
