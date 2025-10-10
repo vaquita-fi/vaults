@@ -18,6 +18,7 @@ This directory contains GitHub Actions workflows for automated deployment of vau
    - `base-mainnet` - For mainnet deployments (recommend protection rules)
 
 3. **Trigger Deployment**:
+   - **Automatic**: Push to `deploy` branch (testnet) or `main` branch (mainnet)
    - **Manual**: Go to Actions tab → "Deploy Vaults to Base Networks" → Run workflow
 
 ## 📋 Supported Tokens
