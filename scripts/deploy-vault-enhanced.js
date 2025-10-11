@@ -23,7 +23,7 @@ const TOKEN_CONFIGS = {
     USDT: {
       address: "0x0a215D8ba66387DCA84B284D18c3B4ec3de6E54a",
       aavePool: "0x8bAB6d1b75f19e9eD9fCe8b9BD338844fF79aE27",
-      symbol: "USDT", 
+      symbol: "USDT",
       name: "Tether USD"
     }
   },
@@ -172,9 +172,9 @@ async function main() {
   const strategyAddress = await strategy.getAddress();
   logStep("DEPLOY", `✅ AaveV3InvestStrategy deployed at: ${strategyAddress}`);
   
-  // 3. Deploy the AccessManagedMSVFee using the custom proxy implementation
-  logStep("DEPLOY", "Deploying AccessManagedMSVFee...");
-  const AccessManagedMSVFee = await ethers.getContractFactory("AccessManagedMSVFee");
+  // 3. Deploy the AccessManagedMSV using the custom proxy implementation
+  logStep("DEPLOY", "Deploying AccessManagedMSV...");
+  const AccessManagedMSV = await ethers.getContractFactory("AccessManagedMSV");
   const AccessManagedProxy = await ethers.getContractFactory("AccessManagedProxy");
   
   // Prepare initialization parameters
@@ -189,7 +189,7 @@ async function main() {
   
   // Deploy using upgrades.deployProxy with custom parameters
   const vault = await upgrades.deployProxy(
-    AccessManagedMSVFee,
+    AccessManagedMSV,
     [
       vaultName,
       vaultSymbol,
@@ -209,12 +209,12 @@ async function main() {
   
   await vault.waitForDeployment();
   const vaultAddress = await vault.getAddress();
-  logStep("DEPLOY", `✅ AccessManagedMSVFee deployed at: ${vaultAddress}`);
+  logStep("DEPLOY", `✅ AccessManagedMSV deployed at: ${vaultAddress}`);
   
   // Helper function to make all views public
   async function makeAllViewsPublic(vault) {
     logStep("SETUP", "Making view functions public...");
-    const vaultInterface = AccessManagedMSVFee.interface;
+    const vaultInterface = AccessManagedMSV.interface;
     
     const selectors = [];
     for (const fragment of Object.values(vaultInterface.fragments)) {
@@ -243,7 +243,7 @@ async function main() {
     const selectors = [];
     for (const functionName of functions) {
       try {
-        const fragment = AccessManagedMSVFee.interface.getFunction(functionName);
+        const fragment = AccessManagedMSV.interface.getFunction(functionName);
         if (fragment) {
           selectors.push(fragment.selector);
         }
@@ -344,7 +344,7 @@ async function main() {
       logStep("VERIFY", "Preparing to verify AccessManagedProxy...");
       
       try {
-        const initializeData = AccessManagedMSVFee.interface.encodeFunctionData("initialize", [
+        const initializeData = AccessManagedMSV.interface.encodeFunctionData("initialize", [
           vaultName,
           vaultSymbol,
           TOKEN_ADDRESS,
