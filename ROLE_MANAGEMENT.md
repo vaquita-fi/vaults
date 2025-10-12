@@ -56,15 +56,9 @@ Based on the deployment script, the following roles are available:
 3. Select "Grant Role" workflow
 4. Click "Run workflow"
 
-### Automatic Triggers
-
-The workflow also runs automatically on:
-- **Push to main/deploy branches** - Uses default values for the cast command example
-- **Changes to grant-role.js or the workflow file** - Triggers with default parameters
-
 ### Manual Triggers
 
-For manual execution with custom parameters:
+The workflow only runs manually:
 1. Go to Actions → "Grant Role" → "Run workflow"
 2. Fill in the form with your desired parameters
 
