@@ -28,7 +28,7 @@ on:
         type: boolean
 
 env:
-  NODE_VERSION: '22'
+  NODE_VERSION: '18'
   VERIFICATION_DELAY: '15'
 
 jobs:
