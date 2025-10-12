@@ -1,0 +1,126 @@
+name: Grant Role
+
+on:
+  push:
+    branches:
+      - main
+      - deploy
+    paths:
+      - 'scripts/grant-role.js'
+      - '.github/workflows/grant-role.yaml'
+  workflow_dispatch:
+    inputs:
+      access_manager_address:
+        description: 'AccessManager contract address'
+        required: true
+        type: string
+      role_id:
+        description: 'Role ID to grant (1-7)'
+        required: true
+        type: string
+        default: '7'
+      target_address:
+        description: 'Address to grant the role to'
+        required: true
+        type: string
+      delay:
+        description: 'Delay in seconds (default: 0)'
+        required: false
+        type: string
+        default: '0'
+      network:
+        description: 'Network to use'
+        required: false
+        type: choice
+        options:
+          - baseSepolia
+          - base
+          - scrollSepolia
+        default: 'baseSepolia'
+
+jobs:
+  grant-role:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Set default values for push trigger
+        if: github.event_name == 'push'
+        run: |
+          echo "ACCESS_MANAGER_ADDRESS=0xCc020c689BC7a485084d335335bE0c4BE520c3E4" >> $GITHUB_ENV
+          echo "ROLE_ID=7" >> $GITHUB_ENV
+          echo "TARGET_ADDRESS=0xfceBCCfD7c74e8c5191609dEd61fD81D26a83327" >> $GITHUB_ENV
+          echo "DELAY=0" >> $GITHUB_ENV
+          echo "HARDHAT_NETWORK=baseSepolia" >> $GITHUB_ENV
+          echo "Set default values for push trigger"
+          
+      - name: Validate inputs
+        run: |
+          echo "Validating inputs..."
+          echo "AccessManager: ${{ github.event.inputs.access_manager_address || env.ACCESS_MANAGER_ADDRESS }}"
+          echo "Role ID: ${{ github.event.inputs.role_id || env.ROLE_ID }}"
+          echo "Target Address: ${{ github.event.inputs.target_address || env.TARGET_ADDRESS }}"
+          echo "Delay: ${{ github.event.inputs.delay || env.DELAY }}"
+          echo "Network: ${{ github.event.inputs.network || env.HARDHAT_NETWORK }}"
+          
+          # Get values from inputs or environment
+          ACCESS_MANAGER="${{ github.event.inputs.access_manager_address || env.ACCESS_MANAGER_ADDRESS }}"
+          ROLE_ID="${{ github.event.inputs.role_id || env.ROLE_ID }}"
+          TARGET_ADDRESS="${{ github.event.inputs.target_address || env.TARGET_ADDRESS }}"
+          NETWORK="${{ github.event.inputs.network || env.HARDHAT_NETWORK }}"
+          
+          # Validate role ID
+          if ! [[ "$ROLE_ID" =~ ^[1-7]$ ]]; then
+            echo "Error: Role ID must be between 1-7"
+            exit 1
+          fi
+          
+          # Validate addresses
+          if ! [[ "$ACCESS_MANAGER" =~ ^0x[a-fA-F0-9]{40}$ ]]; then
+            echo "Error: Invalid AccessManager address format"
+            exit 1
+          fi
+          
+          if ! [[ "$TARGET_ADDRESS" =~ ^0x[a-fA-F0-9]{40}$ ]]; then
+            echo "Error: Invalid target address format"
+            exit 1
+          fi
+          
+      - name: Grant Role
+        env:
+          ACCESS_MANAGER_ADDRESS: ${{ github.event.inputs.access_manager_address || env.ACCESS_MANAGER_ADDRESS }}
+          ROLE_ID: ${{ github.event.inputs.role_id || env.ROLE_ID }}
+          TARGET_ADDRESS: ${{ github.event.inputs.target_address || env.TARGET_ADDRESS }}
+          DELAY: ${{ github.event.inputs.delay || env.DELAY }}
+          HARDHAT_NETWORK: ${{ github.event.inputs.network || env.HARDHAT_NETWORK }}
+          PRIVATE_KEY: ${{ (github.event.inputs.network || env.HARDHAT_NETWORK) == 'base' && secrets.PRODUCTION_PRIVATE_KEY || secrets.TESTNET_PRIVATE_KEY }}
+        run: |
+          echo "Granting role..."
+          echo "AccessManager: $ACCESS_MANAGER_ADDRESS"
+          echo "Role ID: $ROLE_ID"
+          echo "Target Address: $TARGET_ADDRESS"
+          echo "Delay: $DELAY"
+          echo "Network: $HARDHAT_NETWORK"
+          
+          npx hardhat run scripts/grant-role.js --network $HARDHAT_NETWORK
+          
+      - name: Summary
+        run: |
+          echo "## Role Grant Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **AccessManager**: \`${{ github.event.inputs.access_manager_address || env.ACCESS_MANAGER_ADDRESS }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Role ID**: \`${{ github.event.inputs.role_id || env.ROLE_ID }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Target Address**: \`${{ github.event.inputs.target_address || env.TARGET_ADDRESS }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Delay**: \`${{ github.event.inputs.delay || env.DELAY }}\` seconds" >> $GITHUB_STEP_SUMMARY
+          echo "- **Network**: \`${{ github.event.inputs.network || env.HARDHAT_NETWORK }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: ✅ Completed successfully" >> $GITHUB_STEP_SUMMARY
