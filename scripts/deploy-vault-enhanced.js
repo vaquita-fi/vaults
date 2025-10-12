@@ -158,6 +158,7 @@ async function main() {
     STRATEGY_ADMIN_ROLE: 4,
     QUEUE_ADMIN_ROLE: 5,
     FORWARD_TO_STRATEGY_ROLE: 6,
+    READ_ONLY_ROLE: 7
   };
   
   // 2. Deploy AaveV3InvestStrategy
@@ -269,6 +270,7 @@ async function main() {
   await setupRole("QUEUE_ADMIN_ROLE", ["changeDepositQueue", "changeWithdrawQueue"]);
   await setupRole("REBALANCER_ROLE", ["rebalance"]);
   await setupRole("FORWARD_TO_STRATEGY_ROLE", ["forwardToStrategy"]);
+  await setupRole("READ_ONLY_ROLE", ["previewDeposit", "previewMint", "previewWithdraw", "previewRedeem"]);
   
   // Get implementation address from storage slot
   const provider = ethers.provider;
