@@ -1,0 +1,1 @@
+gh workflow run grant-role.yaml --repo vaquita-fi/vaults --ref deploy -f access_manager_address=0xBBcf838B264570af93B1ABB004879Cf7eE915161 -f role_id=7 -f target_address=0xfceBCCfD7c74e8c5191609dEd61fD81D26a83327 -f delay=0 -f network=baseSepolia

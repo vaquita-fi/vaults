@@ -1,0 +1,1 @@
+gh workflow run deploy.yaml --repo vaquita-fi/vaults --ref deploy -f network=baseSepolia -f token=USDT

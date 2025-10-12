@@ -26,12 +26,12 @@ module.exports = {
       initialBaseFeePerGas: 0,
     },
     base: {
-      url: "https://base-mainnet.g.alchemy.com/v2/bqyyjg0O_PTODCAzky3s9a68zwTnn7x3",
+      url: "https://mainnet.base.org",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
       gasPrice: 1000000,
     },
     baseSepolia: {
-      url: "https://base-sepolia.g.alchemy.com/v2/bqyyjg0O_PTODCAzky3s9a68zwTnn7x3",
+      url: "https://sepolia.base.org",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
       gasPrice: 1000000,
     },
