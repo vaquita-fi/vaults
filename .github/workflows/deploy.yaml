@@ -50,6 +50,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Clean cache and artifacts
+        run: |
+          npx hardhat clean
+          rm -rf cache/
+          rm -rf artifacts/
+
       - name: Compile contracts
         run: npx hardhat compile
 
@@ -92,6 +98,12 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Clean cache and artifacts
+        run: |
+          npx hardhat clean
+          rm -rf cache/
+          rm -rf artifacts/
 
       - name: Compile contracts
         run: npx hardhat compile
