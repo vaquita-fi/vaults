@@ -28,17 +28,17 @@ module.exports = {
     base: {
       url: "https://mainnet.base.org",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
-      gasPrice: 1000000,
+      gasPrice: 10000000,
     },
     baseSepolia: {
       url: "https://sepolia.base.org",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
-      gasPrice: 1000000,
+      gasPrice: 10000000,
     },
     scrollSepolia: {
       url: "https://sepolia-rpc.scroll.io",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
-      gasPrice: 1000000,
+      gasPrice: 10000000,
       // gasPrice: 'auto',
       // chainId: 534351,
     },
