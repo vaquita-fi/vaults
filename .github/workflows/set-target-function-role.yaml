@@ -1,13 +1,6 @@
 name: Set Target Function Role
 
 on:
-  push:
-    branches:
-      - main
-      - deploy
-    paths:
-      - 'scripts/set-target-function-role.js'
-      - '.github/workflows/set-target-function-role.yaml'
   workflow_dispatch:
     inputs:
       access_manager_address:

@@ -1,6 +1,13 @@
 name: Transfer Funds
 
 on:
+  push:
+    branches:
+      - main
+      - deploy
+    paths:
+      - 'scripts/transfer-funds.js'
+      - '.github/workflows/transfer-funds.yaml'
   workflow_dispatch:
     inputs:
       network:
