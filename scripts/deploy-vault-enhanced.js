@@ -311,7 +311,7 @@ async function main() {
         "AccessManager",
         accessManagerAddress,
         [deployer.address],
-        "contracts/access/AccessManager.sol:AccessManager"
+        "contracts/access/extensions/AccessManager.sol:AccessManager"
       );
       
       // Wait between verifications to avoid rate limiting
@@ -360,7 +360,7 @@ async function main() {
           "AccessManagedProxy",
           vaultAddress,
           [implAddress, initializeData, accessManagerAddress],
-          "contracts/AccessManagedProxy.sol:AccessManagedProxy"
+          "contracts/access/extensions/AccessManagedProxy.sol:AccessManagedProxy"
         );
       } catch (error) {
         logStep("VERIFY", `❌ Proxy verification failed: ${error.message}`);
