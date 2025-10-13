@@ -28,17 +28,17 @@ module.exports = {
     base: {
       url: "https://base-mainnet.g.alchemy.com/v2/CKtBSkPQbM8JlHqz2GPiVnDLxbiBXXGT",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
-      gasPrice: 10000000,
+      gasPrice: 100000000,
     },
     baseSepolia: {
       url: "https://base-sepolia.g.alchemy.com/v2/CKtBSkPQbM8JlHqz2GPiVnDLxbiBXXGT",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
-      gasPrice: 10000000,
+      gasPrice: 100000000,
     },
     scrollSepolia: {
       url: "https://sepolia-rpc.scroll.io",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
-      gasPrice: 10000000,
+      gasPrice: 100000000,
       // gasPrice: 'auto',
       // chainId: 534351,
     },
