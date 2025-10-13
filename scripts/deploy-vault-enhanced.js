@@ -360,7 +360,7 @@ async function main() {
           "AccessManagedProxy",
           vaultAddress,
           [implAddress, initializeData, accessManagerAddress],
-          "contracts/access/extensions/AccessManagedProxy.sol:AccessManagedProxy"
+          "contracts/AccessManagedProxy.sol:AccessManagedProxy"
         );
       } catch (error) {
         logStep("VERIFY", `❌ Proxy verification failed: ${error.message}`);
