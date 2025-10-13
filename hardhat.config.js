@@ -28,17 +28,15 @@ module.exports = {
     base: {
       url: "https://base-mainnet.g.alchemy.com/v2/CKtBSkPQbM8JlHqz2GPiVnDLxbiBXXGT",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
-      gas: 100000000,
+      // Let provider suggest EIP-1559 fees; avoid static gas to reduce replacements
     },
     baseSepolia: {
       url: "https://base-sepolia.g.alchemy.com/v2/CKtBSkPQbM8JlHqz2GPiVnDLxbiBXXGT",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
-      gas: 100000000,
     },
     scrollSepolia: {
       url: "https://sepolia-rpc.scroll.io",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
-      gas: 100000000,
       // gasPrice: 'auto',
       // chainId: 534351,
     },

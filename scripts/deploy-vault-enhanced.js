@@ -227,7 +227,8 @@ async function main() {
     
     if (selectors.length > 0) {
       logStep("SETUP", `Setting ${selectors.length} view functions as public...`);
-      await accessManager.setTargetFunctionRole(vaultAddress, selectors, 0);
+      const tx = await accessManager.setTargetFunctionRole(vaultAddress, selectors, 0);
+      await tx.wait();
       logStep("SETUP", "✅ View functions set as public");
     }
   }
@@ -254,8 +255,11 @@ async function main() {
     }
     
     if (selectors.length > 0) {
-      await accessManager.setTargetFunctionRole(vaultAddress, selectors, roleId);
-      await accessManager.grantRole(roleId, deployer.address, 0);
+      // Send transactions sequentially and wait for mining to avoid nonce collisions
+      const tx1 = await accessManager.setTargetFunctionRole(vaultAddress, selectors, roleId);
+      await tx1.wait();
+      const tx2 = await accessManager.grantRole(roleId, deployer.address, 0);
+      await tx2.wait();
       logStep("SETUP", `✅ ${roleName} role configured`);
     }
   }
