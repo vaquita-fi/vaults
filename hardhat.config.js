@@ -26,12 +26,12 @@ module.exports = {
       initialBaseFeePerGas: 0,
     },
     base: {
-      url: "https://mainnet.base.org",
+      url: "https://base-mainnet.g.alchemy.com/v2/bqyyjg0O_PTODCAzky3s9a68zwTnn7x3",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
       gasPrice: 10000000,
     },
     baseSepolia: {
-      url: "https://sepolia.base.org",
+      url: "https://base-sepolia.g.alchemy.com/v2/bqyyjg0O_PTODCAzky3s9a68zwTnn7x3",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
       gasPrice: 10000000,
     },
@@ -50,24 +50,24 @@ module.exports = {
         network: "base",
         chainId: 8453,
         urls: {
-          apiURL: "https://api.etherscan.io/v2/api",
-          browserURL: "https://basescan.org"
+          apiURL: "https://api.etherscan.io/v2/api?chainid=8453",
+          browserURL: "https://basescan.org/"
         }
       },
       {
         network: "baseSepolia",
         chainId: 84532,
         urls: {
-          apiURL: "https://api.etherscan.io/v2/api",
-          browserURL: "https://sepolia.basescan.org"
+          apiURL: "https://api.etherscan.io/v2/api?chainid=84532",
+          browserURL: "https://sepolia.basescan.org/"
         }
       },
       {
         network: "scrollSepolia",
         chainId: 534351,
         urls: {
-          apiURL: "https://api.etherscan.io/v2/api",
-          browserURL: "https://sepolia.scrollscan.com"
+          apiURL: "https://api.etherscan.io/v2/api?chainid=534351",
+          browserURL: "https://sepolia.scrollscan.com/"
         }
       }
     ]
