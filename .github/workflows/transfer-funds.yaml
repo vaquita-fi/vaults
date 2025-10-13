@@ -1,0 +1,231 @@
+name: Transfer Funds
+
+on:
+  workflow_dispatch:
+    inputs:
+      network:
+        description: 'Network to transfer from'
+        required: true
+        type: choice
+        options:
+          - baseSepolia
+          - base
+        default: 'baseSepolia'
+      recipient_address:
+        description: 'Recipient address to send funds to'
+        required: true
+        type: string
+      transfer_type:
+        description: 'Type of transfer'
+        required: true
+        type: choice
+        options:
+          - eth
+          - token
+        default: 'eth'
+      token_address:
+        description: 'Token contract address (required for token transfers)'
+        required: false
+        type: string
+      transfer_amount:
+        description: 'Amount to transfer (leave empty for all funds)'
+        required: false
+        type: string
+      confirm_transfer:
+        description: 'Confirm you want to transfer funds'
+        required: true
+        type: boolean
+        default: false
+
+env:
+  NODE_VERSION: '20'
+  VERIFICATION_DELAY: '15'
+
+jobs:
+  transfer-funds:
+    if: ${{ github.event.inputs.confirm_transfer == true }}
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Clean cache and artifacts
+        run: |
+          npx hardhat clean
+          rm -rf cache/
+          rm -rf artifacts/
+        
+      - name: Compile contracts
+        run: npx hardhat compile
+        
+      - name: Validate inputs
+        run: |
+          echo "Validating inputs..."
+          echo "Network: ${{ github.event.inputs.network }}"
+          echo "Recipient: ${{ github.event.inputs.recipient_address }}"
+          echo "Transfer Type: ${{ github.event.inputs.transfer_type }}"
+          echo "Token Address: ${{ github.event.inputs.token_address }}"
+          echo "Transfer Amount: ${{ github.event.inputs.transfer_amount }}"
+          echo "Confirm Transfer: ${{ github.event.inputs.confirm_transfer }}"
+          
+          # Get values from inputs
+          NETWORK="${{ github.event.inputs.network }}"
+          RECIPIENT="${{ github.event.inputs.recipient_address }}"
+          TRANSFER_TYPE="${{ github.event.inputs.transfer_type }}"
+          TOKEN_ADDRESS="${{ github.event.inputs.token_address }}"
+          TRANSFER_AMOUNT="${{ github.event.inputs.transfer_amount }}"
+          
+          # Validate recipient address
+          if ! [[ "$RECIPIENT" =~ ^0x[a-fA-F0-9]{40}$ ]]; then
+            echo "Error: Invalid recipient address format"
+            exit 1
+          fi
+          
+          # Validate token address if token transfer
+          if [[ "$TRANSFER_TYPE" == "token" ]]; then
+            if [[ -z "$TOKEN_ADDRESS" ]]; then
+              echo "Error: Token address is required for token transfers"
+              exit 1
+            fi
+            
+            if ! [[ "$TOKEN_ADDRESS" =~ ^0x[a-fA-F0-9]{40}$ ]]; then
+              echo "Error: Invalid token address format"
+              exit 1
+            fi
+          fi
+          
+          # Validate transfer amount if provided
+          if [[ -n "$TRANSFER_AMOUNT" ]]; then
+            if ! [[ "$TRANSFER_AMOUNT" =~ ^[0-9]+\.?[0-9]*$ ]]; then
+              echo "Error: Invalid transfer amount format"
+              exit 1
+            fi
+          fi
+          
+          echo "✅ All inputs validated successfully"
+          
+      - name: Get Account Balance
+        env:
+          HARDHAT_NETWORK: ${{ github.event.inputs.network }}
+          PRIVATE_KEY: ${{ github.event.inputs.network == 'base' && secrets.PRODUCTION_PRIVATE_KEY || secrets.TESTNET_PRIVATE_KEY }}
+        run: |
+          echo "Checking account balance..."
+          echo "Network: $HARDHAT_NETWORK"
+          
+          # Get ETH balance
+          npx hardhat run -e "
+            const [signer] = await ethers.getSigners();
+            const balance = await signer.provider.getBalance(signer.address);
+            console.log('ETH Balance:', ethers.formatEther(balance), 'ETH');
+            console.log('Account Address:', signer.address);
+          " --network $HARDHAT_NETWORK
+          
+          # Get token balance if token transfer
+          if [[ "${{ github.event.inputs.transfer_type }}" == "token" && -n "${{ github.event.inputs.token_address }}" ]]; then
+            npx hardhat run -e "
+              const [signer] = await ethers.getSigners();
+              const tokenContract = new ethers.Contract('${{ github.event.inputs.token_address }}', [
+                'function balanceOf(address owner) view returns (uint256)',
+                'function symbol() view returns (string)',
+                'function decimals() view returns (uint8)'
+              ], signer);
+              
+              const [balance, symbol, decimals] = await Promise.all([
+                tokenContract.balanceOf(signer.address),
+                tokenContract.symbol(),
+                tokenContract.decimals()
+              ]);
+              
+              console.log('Token Balance:', ethers.formatUnits(balance, decimals), symbol);
+            " --network $HARDHAT_NETWORK
+          fi
+          
+      - name: Transfer Funds
+        env:
+          RECIPIENT_ADDRESS: ${{ github.event.inputs.recipient_address }}
+          TOKEN_ADDRESS: ${{ github.event.inputs.token_address }}
+          TRANSFER_AMOUNT: ${{ github.event.inputs.transfer_amount }}
+          HARDHAT_NETWORK: ${{ github.event.inputs.network }}
+          PRIVATE_KEY: ${{ github.event.inputs.network == 'base' && secrets.PRODUCTION_PRIVATE_KEY || secrets.TESTNET_PRIVATE_KEY }}
+        run: |
+          echo "Transferring funds..."
+          echo "Recipient: $RECIPIENT_ADDRESS"
+          echo "Token: $TOKEN_ADDRESS"
+          echo "Amount: $TRANSFER_AMOUNT"
+          echo "Network: $HARDHAT_NETWORK"
+          
+          npx hardhat run scripts/transfer-funds.js --network $HARDHAT_NETWORK
+          
+      - name: Verify Transfer
+        env:
+          HARDHAT_NETWORK: ${{ github.event.inputs.network }}
+          PRIVATE_KEY: ${{ github.event.inputs.network == 'base' && secrets.PRODUCTION_PRIVATE_KEY || secrets.TESTNET_PRIVATE_KEY }}
+        run: |
+          echo "Verifying transfer..."
+          
+          # Check final ETH balance
+          npx hardhat run -e "
+            const [signer] = await ethers.getSigners();
+            const balance = await signer.provider.getBalance(signer.address);
+            console.log('Final ETH Balance:', ethers.formatEther(balance), 'ETH');
+          " --network $HARDHAT_NETWORK
+          
+          # Check final token balance if token transfer
+          if [[ "${{ github.event.inputs.transfer_type }}" == "token" && -n "${{ github.event.inputs.token_address }}" ]]; then
+            npx hardhat run -e "
+              const [signer] = await ethers.getSigners();
+              const tokenContract = new ethers.Contract('${{ github.event.inputs.token_address }}', [
+                'function balanceOf(address owner) view returns (uint256)',
+                'function symbol() view returns (string)',
+                'function decimals() view returns (uint8)'
+              ], signer);
+              
+              const [balance, symbol, decimals] = await Promise.all([
+                tokenContract.balanceOf(signer.address),
+                tokenContract.symbol(),
+                tokenContract.decimals()
+              ]);
+              
+              console.log('Final Token Balance:', ethers.formatUnits(balance, decimals), symbol);
+            " --network $HARDHAT_NETWORK
+          fi
+          
+      - name: Summary
+        run: |
+          echo "## Fund Transfer Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Network**: \`${{ github.event.inputs.network }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Recipient**: \`${{ github.event.inputs.recipient_address }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Transfer Type**: \`${{ github.event.inputs.transfer_type }}\`" >> $GITHUB_STEP_SUMMARY
+          if [[ "${{ github.event.inputs.transfer_type }}" == "token" ]]; then
+            echo "- **Token Address**: \`${{ github.event.inputs.token_address }}\`" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [[ -n "${{ github.event.inputs.transfer_amount }}" ]]; then
+            echo "- **Amount**: \`${{ github.event.inputs.transfer_amount }}\`" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- **Amount**: \`ALL\`" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "- **Status**: ✅ Completed successfully" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ⚠️ Security Note" >> $GITHUB_STEP_SUMMARY
+          echo "This action transfers funds from your deployment accounts. Make sure you have the correct recipient address and intended amount." >> $GITHUB_STEP_SUMMARY
+
+  # Safety check job
+  safety-check:
+    if: ${{ github.event.inputs.confirm_transfer != true }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Transfer Not Confirmed
+        run: |
+          echo "## ⚠️ Transfer Not Confirmed" >> $GITHUB_STEP_SUMMARY
+          echo "The transfer was not executed because the confirmation checkbox was not checked." >> $GITHUB_STEP_SUMMARY
+          echo "To proceed with the transfer, please check the 'Confirm transfer' checkbox and re-run the workflow." >> $GITHUB_STEP_SUMMARY

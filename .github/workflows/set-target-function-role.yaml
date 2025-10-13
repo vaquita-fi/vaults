@@ -1,0 +1,142 @@
+name: Set Target Function Role
+
+on:
+  push:
+    branches:
+      - main
+      - deploy
+    paths:
+      - 'scripts/set-target-function-role.js'
+      - '.github/workflows/set-target-function-role.yaml'
+  workflow_dispatch:
+    inputs:
+      access_manager_address:
+        description: 'AccessManager contract address'
+        required: true
+        type: string
+      target_address:
+        description: 'Target contract address'
+        required: true
+        type: string
+      function_selectors:
+        description: 'Function selectors (comma-separated, e.g., 0x12345678,0x87654321)'
+        required: true
+        type: string
+      role_id:
+        description: 'Role ID to assign (0-7, 0=public)'
+        required: true
+        type: string
+        default: '0'
+      network:
+        description: 'Network to use'
+        required: false
+        type: choice
+        options:
+          - baseSepolia
+          - base
+          - scrollSepolia
+        default: 'baseSepolia'
+
+env:
+  NODE_VERSION: '20'
+  VERIFICATION_DELAY: '15'
+
+jobs:
+  set-target-function-role:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Clean cache and artifacts
+        run: |
+          npx hardhat clean
+          rm -rf cache/
+          rm -rf artifacts/
+        
+      - name: Compile contracts
+        run: npx hardhat compile
+        
+      - name: Validate inputs
+        run: |
+          echo "Validating inputs..."
+          echo "AccessManager: ${{ github.event.inputs.access_manager_address }}"
+          echo "Target Address: ${{ github.event.inputs.target_address }}"
+          echo "Function Selectors: ${{ github.event.inputs.function_selectors }}"
+          echo "Role ID: ${{ github.event.inputs.role_id }}"
+          echo "Network: ${{ github.event.inputs.network }}"
+          
+          # Get values from inputs
+          ACCESS_MANAGER="${{ github.event.inputs.access_manager_address }}"
+          TARGET_ADDRESS="${{ github.event.inputs.target_address }}"
+          FUNCTION_SELECTORS="${{ github.event.inputs.function_selectors }}"
+          ROLE_ID="${{ github.event.inputs.role_id }}"
+          NETWORK="${{ github.event.inputs.network }}"
+          
+          # Validate role ID
+          if ! [[ "$ROLE_ID" =~ ^[0-7]$ ]]; then
+            echo "Error: Role ID must be between 0-7 (0 for public)"
+            exit 1
+          fi
+          
+          # Validate addresses
+          if ! [[ "$ACCESS_MANAGER" =~ ^0x[a-fA-F0-9]{40}$ ]]; then
+            echo "Error: Invalid AccessManager address format"
+            exit 1
+          fi
+          
+          if ! [[ "$TARGET_ADDRESS" =~ ^0x[a-fA-F0-9]{40}$ ]]; then
+            echo "Error: Invalid target address format"
+            exit 1
+          fi
+          
+          # Validate function selectors
+          IFS=',' read -ra SELECTORS <<< "$FUNCTION_SELECTORS"
+          for selector in "${SELECTORS[@]}"; do
+            selector=$(echo "$selector" | xargs) # trim whitespace
+            if ! [[ "$selector" =~ ^0x[a-fA-F0-9]{8}$ ]]; then
+              echo "Error: Invalid function selector format: $selector"
+              echo "Function selectors must be 4-byte hex strings (e.g., 0x12345678)"
+              exit 1
+            fi
+          done
+          
+          echo "✅ All inputs validated successfully"
+          
+      - name: Set Target Function Role
+        env:
+          ACCESS_MANAGER_ADDRESS: ${{ github.event.inputs.access_manager_address }}
+          TARGET_ADDRESS: ${{ github.event.inputs.target_address }}
+          FUNCTION_SELECTORS: ${{ github.event.inputs.function_selectors }}
+          ROLE_ID: ${{ github.event.inputs.role_id }}
+          HARDHAT_NETWORK: ${{ github.event.inputs.network }}
+          PRIVATE_KEY: ${{ github.event.inputs.network == 'base' && secrets.PRODUCTION_PRIVATE_KEY || secrets.TESTNET_PRIVATE_KEY }}
+        run: |
+          echo "Setting target function roles..."
+          echo "AccessManager: $ACCESS_MANAGER_ADDRESS"
+          echo "Target Address: $TARGET_ADDRESS"
+          echo "Function Selectors: $FUNCTION_SELECTORS"
+          echo "Role ID: $ROLE_ID"
+          echo "Network: $HARDHAT_NETWORK"
+          
+          npx hardhat run scripts/set-target-function-role.js --network $HARDHAT_NETWORK
+          
+      - name: Summary
+        run: |
+          echo "## Function Role Assignment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **AccessManager**: \`${{ github.event.inputs.access_manager_address }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Target Contract**: \`${{ github.event.inputs.target_address }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Function Selectors**: \`${{ github.event.inputs.function_selectors }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Role ID**: \`${{ github.event.inputs.role_id }}\` ${{ github.event.inputs.role_id == '0' && '(Public)' || '' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Network**: \`${{ github.event.inputs.network }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: ✅ Completed successfully" >> $GITHUB_STEP_SUMMARY
