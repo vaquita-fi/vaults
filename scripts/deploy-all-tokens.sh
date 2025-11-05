@@ -100,7 +100,7 @@ for TOKEN in "${TOKEN_ARRAY[@]}"; do
   fi
   
   # Run deployment
-  if VERIFY_CONTRACTS=$VERIFY TOKEN_TYPE=$TOKEN npx hardhat run scripts/deploy-vault-enhanced.js --network $NETWORK; then
+  if VERIFY_CONTRACTS=$VERIFY TOKEN_TYPE=$TOKEN npx hardhat run scripts/deploy-vault.js --network $NETWORK; then
     echo "✅ $TOKEN deployment completed successfully!"
     DEPLOYMENT_RESULTS[$TOKEN]="SUCCESS"
     

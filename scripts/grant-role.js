@@ -1,6 +1,6 @@
 const { ethers } = require("hardhat");
 
-// Role definitions (matching deploy-vault-enhanced.js)
+// Role definitions (matching deploy-vault.js)
 const roles = {
   LP_ROLE: 1,
   LOM_ADMIN: 2,

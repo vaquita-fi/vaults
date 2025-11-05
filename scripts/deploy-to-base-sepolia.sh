@@ -74,7 +74,7 @@ echo "🚀 Running enhanced deployment script on Base Sepolia..."
 echo "📊 Token: $TOKEN_TYPE"
 echo "🔍 Verification: $VERIFY"
 
-VERIFY_CONTRACTS=$VERIFY TOKEN_TYPE=$TOKEN_TYPE npx hardhat run scripts/deploy-vault-enhanced.js --network baseSepolia
+VERIFY_CONTRACTS=$VERIFY TOKEN_TYPE=$TOKEN_TYPE npx hardhat run scripts/deploy-vault.js --network baseSepolia
 
 # Deployment completed message
 echo ""

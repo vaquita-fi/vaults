@@ -6,7 +6,7 @@ echo "===================================="
 echo ""
 
 echo "📁 New Files Created:"
-echo "  ✅ scripts/deploy-vault-enhanced.js - Enhanced deployment script with multi-token support"
+echo "  ✅ scripts/deploy-vault.js - Enhanced deployment script with multi-token support"
 echo "  ✅ scripts/deploy-all-tokens.sh - Multi-token deployment script"
 echo "  ✅ scripts/verify-contracts-enhanced.sh - Enhanced verification with better logging"
 echo "  ✅ DEPLOYMENT_GUIDE.md - Comprehensive deployment guide"
